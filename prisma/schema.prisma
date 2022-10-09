@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Friend{
+  id Int @id @default(autoincrement())
+  userId Int 
+  follower User @relation("follower",fields: [userId],references: [id])
+  otherId Int 
+  following User @relation("following",fields: [otherId],references: [id])
+  isFriend Boolean @default(false)
+  isRefuse Boolean @default(false)
+  messages Message[]
+  createAt DateTime @default(now())
+  @@unique([userId,otherId])
+  
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  username String @unique
+  email String @unique
+  password String
+  token String? @db.VarChar(500)
+  creadeAt DateTime @default(now())
+  avatar String?
+  description String? @default("暂无个人介绍~")
+  allMessages AllMessage[]
+  follower Friend[] @relation("follower")
+  following Friend[] @relation("following")
+}
+
+model Message{
+  id Int @id @default(autoincrement())
+  userId Int
+  friendId Int
+  Friend Friend @relation(fields: [friendId],references: [id])
+  createAt DateTime @default(now())
+  isImage Boolean @default(false)
+  content String?
+  image String?
+}
+
+model AllMessage{
+  id Int @id @default(autoincrement())
+  userId Int
+  User User @relation(fields: [userId],references: [id])
+  createAt DateTime @default(now())
+  content String?
+  image String?
+}
+
